@@ -2,6 +2,7 @@ package org.grails.plugins.quartz;
 
 import org.codehaus.groovy.grails.plugins.quartz.GrailsJobFactory;
 import org.hibernate.SessionFactory;
+import org.hibernate.Session;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -63,7 +64,9 @@ public class QuartzMonitorJobFactory extends GrailsJobFactory {
             long start = System.currentTimeMillis();
             try {
                 job.execute(context);
-                sessionFactory.getCurrentSession().flush();
+                Session session = sessionFactory.getCurrentSession();
+                if (session)
+                    session.flush();
             } catch (Throwable e) {
                 jobDetails.put("error", e.getMessage());
                 jobDetails.put("status", "error");
