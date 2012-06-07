@@ -1,15 +1,17 @@
 package org.grails.plugins.quartz;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.codehaus.groovy.grails.plugins.quartz.GrailsJobFactory;
+import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
+import org.hibernate.Session;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.spi.TriggerFiredBundle;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Job factory which enhances GrailsJobFactory.
@@ -63,9 +65,9 @@ public class QuartzMonitorJobFactory extends GrailsJobFactory {
             long start = System.currentTimeMillis();
             try {
                 job.execute(context);
-                if (job.job.sessionRequired) {
-                    sessionFactory.getCurrentSession().flush();
-                }
+                Session session = sessionFactory.getCurrentSession();
+                if (session != null)
+                  session.flush();
             } catch (Throwable e) {
                 jobDetails.put("error", e.getMessage());
                 jobDetails.put("status", "error");
